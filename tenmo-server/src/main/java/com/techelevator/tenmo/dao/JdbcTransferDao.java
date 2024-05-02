@@ -1,9 +1,9 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.dao.JdbcAccountDao;
-import
 import com.techelevator.tenmo.exception.DaoException;
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.rowMapper.TransferRowMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,10 +54,7 @@ public class JdbcTransferDao implements TransferDao{
         String sql = "SELECT * FROM transfer WHERE transfer_status_id = ? " +
                 "AND(account_from = ? OR account_to =? );";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transferStatusId, accountId, accountId);
-            while (results.next()) {
-                transferList.add(mapRawToTransfer(results));
-            }
+            transferList = jdbcTemplate.query(sql, new TransferRowMapper(), transferStatusId, accountId, accountId);
         } catch (DaoException ex){
             handleDbException(ex, "get transfers by status");
         }
@@ -65,20 +63,38 @@ public class JdbcTransferDao implements TransferDao{
 
     @Override
     public Transfer getTransferByTransferId(int transferId, int userId) {
-        return null;
+        Transfer transfer = new Transfer();
+        String sql = "SELECT * FROM transfer WHERE transfer_id = ? AND (account_from = " +
+                "(SELECT account_id FROM account WHERE user_id = ?) OR account_to = " +
+                "(SELECT account_id FROM account WHERE user_id = ?))";
+        try{
+            transfer = jdbcTemplate.queryForObject(sql, new TransferRowMapper(), transferId, userId, userId);
+        }catch (DaoException ex){
+            handleDbException(ex,"get transfer by transfer ID");
+        }
+        return transfer;
     }
+
+    /*
+
+    Ready for a challenge??
+
+    */
 
     @Override
     public String requestMoney(BigDecimal amountRequested, int requesterUserId, int requesteeUserId) {
         return null;
     }
 
+
     public void handleDbException(Exception ex, String verb) {
         if (ex instanceof CannotGetJdbcConnectionException) {
             throw new DaoException("Could not connect to database: "
                     + ex.getMessage(), ex);
         } else if (ex instanceof BadSqlGrammarException) {
-            throw new DaoException("Error in SQL" + ex.getMessage(), ex);
+            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
+        }else if (ex instanceof SQLException){
+            throw new DaoException("SQL exception" + ex.getMessage(), ex);
         } else if (ex instanceof DataIntegrityViolationException) {
             throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
         } else {
@@ -86,14 +102,5 @@ public class JdbcTransferDao implements TransferDao{
         }
     }
 
-    private Transfer mapRawToTransfer(SqlRowSet result){
-        Transfer transfer = new Transfer();
-        transfer.setTransferId(result.getInt("transfer_id"));
-        transfer.setTransferTypeId(result.getInt("transfer_type_id"));
-        transfer.setTransferStatusId(result.getInt("transfer_status_id"));
-        transfer.setAccountFrom(result.getInt("account_from"));
-        transfer.setAccountTo(result.getInt("account_to"));
-        transfer.setTransferAmount(result.getBigDecimal("amount"));
-        return transfer;
-    }
+
 }

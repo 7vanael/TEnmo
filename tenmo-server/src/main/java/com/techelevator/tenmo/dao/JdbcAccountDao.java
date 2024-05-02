@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 
 @Component
 public class JdbcAccountDao implements AccountDao {
@@ -71,12 +72,14 @@ public class JdbcAccountDao implements AccountDao {
         return convertedBalance;
     }
 
-    private void handleDbException(Exception ex, String verb) {
+    public void handleDbException(Exception ex, String verb) {
         if (ex instanceof CannotGetJdbcConnectionException) {
             throw new DaoException("Could not connect to database: "
                     + ex.getMessage(), ex);
         } else if (ex instanceof BadSqlGrammarException) {
-            throw new DaoException("Error in SQL" + ex.getMessage(), ex);
+            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
+        } else if (ex instanceof SQLException) {
+            throw new DaoException("SQL exception" + ex.getMessage(), ex);
         } else if (ex instanceof DataIntegrityViolationException) {
             throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
         } else {
