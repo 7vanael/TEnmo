@@ -35,10 +35,12 @@ public class TransferService {
 
     public BigDecimal getBalanceById(AuthenticatedUser authenticatedUser){
 
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         BigDecimal balance = new BigDecimal("-1");
         try{
             Account account = getAccountByUserId(authenticatedUser);
-            balance = restTemplate.getForObject(baseURL + account.getAccountId(), BigDecimal.class);
+            ResponseEntity<BigDecimal> response = restTemplate.exchange(baseURL + account.getAccountId(), HttpMethod.GET, entity, BigDecimal.class);
+            balance = response.getBody();
             if(balance.compareTo(BigDecimal.ZERO)< 0){
                 throw new RuntimeException("Unable to retrieve balance");
             }
@@ -49,8 +51,11 @@ public class TransferService {
         return balance;
     }
 
-
-
+    private HttpEntity<Void> makeVoidEntity (AuthenticatedUser authUser){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authUser.getToken());
+        return new HttpEntity<>(headers);
+    }
     private HttpEntity<Account> makeAccountEntity (Account account, AuthenticatedUser authUser){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
