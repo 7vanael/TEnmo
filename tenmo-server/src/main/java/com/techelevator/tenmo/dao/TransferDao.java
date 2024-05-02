@@ -6,12 +6,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface TransferDao {
-    BigDecimal sendMoney(BigDecimal amountToSend, int fromUserId, int toUserId);
+    int createTransfer(int transferTypeId, int transferStatusId, int fromUserId,
+                  int toUserId, BigDecimal amountToSend);
 
 
 //    List<Transfer> getTransferHistory(int userId);
 
-    List<Transfer> getTransfersByStatus(int transferId, int status, int userId);
+    List<Transfer> getTransfersByStatus(int transferStatusId, int accountId);
 
     //So, do they really want to let you look up any transfer by transferID
     //without regard to if it involves the logged in user?
@@ -19,6 +20,6 @@ public interface TransferDao {
 
     String requestMoney(BigDecimal amountRequested, int requesterUserId, int requesteeUserId);
 
-
+    void handleDbException(Exception ex, String verb);
 
 }
