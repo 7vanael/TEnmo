@@ -49,8 +49,9 @@ public class JdbcUserDao implements UserDao {
         }
     }
 
+
     @Override
-    public List<User> findAll() {
+    public User [] findAll() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT user_id, username, password_hash FROM tenmo_user";
 
@@ -60,7 +61,9 @@ public class JdbcUserDao implements UserDao {
             users.add(user);
         }
 
-        return users;
+        User [] userArray = users.toArray(new User[0]);
+
+        return userArray;
     }
 
     @Override

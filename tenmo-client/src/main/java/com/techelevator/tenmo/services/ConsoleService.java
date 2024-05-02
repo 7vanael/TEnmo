@@ -257,6 +257,17 @@ public class ConsoleService {
         }
     }
 
+    public int promptForStartTransfer(String prompt) {
+        int menuSelection;
+        System.out.print(prompt);
+        try {
+            menuSelection = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            menuSelection = -1;
+        }
+        return menuSelection;
+    }
+
     public void pause() {
         System.out.println("\nPress Enter to continue...");
         scanner.nextLine();

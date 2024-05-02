@@ -7,7 +7,6 @@ import com.techelevator.tenmo.services.ConsoleService;
 import com.techelevator.tenmo.services.TransferService;
 
 import java.math.BigDecimal;
-import java.sql.SQLOutput;
 
 public class App {
 
@@ -88,9 +87,34 @@ public class App {
             consoleService.pause();
         }
     }
+    private void startSend() {
+        System.out.println("Select a user name to Initiate a Transfer: \n");
+        transferService.printAllUsers(currentUser);
+        boolean validUser = false;
+        while(!validUser) {
+            String targetUser = consoleService.promptForString("Enter the username for the transfer:");
+
+            if(transferService.validUserSelected(targetUser, currentUser)){
+                validUser = true;
+            }
+        }
+//            while (menuSelection != 0 && currentUser == null) {
+//            consoleService.printLoginMenu();
+//            menuSelection = consoleService.promptForMenuSelection("Please choose an option: ");
+//            if (menuSelection == 1) {
+//                handleRegister();
+//            } else if (menuSelection == 2) {
+//                handleLogin();
+//            } else if (menuSelection != 0) {
+//                System.out.println("Invalid Selection");
+//                consoleService.pause();
+//            }
+
+
+    }
 
 	private void viewCurrentBalance() {
-		BigDecimal balance = transferService.getBalanceById(currentUser);
+		BigDecimal balance = transferService.getBalanceByUser(currentUser);
         System.out.println("Your current balance is: " + balance);
 		
 	}

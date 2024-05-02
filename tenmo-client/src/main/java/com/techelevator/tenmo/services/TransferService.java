@@ -3,6 +3,7 @@ package com.techelevator.tenmo.services;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.User;
 import com.techelevator.util.BasicLogger;
 import org.springframework.http.*;
 import org.springframework.web.client.ResourceAccessException;
@@ -10,6 +11,9 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.sql.SQLOutput;
+import java.util.Arrays;
+import java.util.List;
 
 public class TransferService {
 
@@ -17,6 +21,7 @@ public class TransferService {
     private final RestTemplate restTemplate = new RestTemplate();
     private AuthenticatedUser authenticatedUser;
     private Account account;
+    private User user;
 
 
     public TransferService(String baseURL){
@@ -33,13 +38,13 @@ public class TransferService {
         return account;
     }
 
-    public BigDecimal getBalanceById(AuthenticatedUser authenticatedUser){
+    public BigDecimal getBalanceByUser(AuthenticatedUser authenticatedUser){
 
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         BigDecimal balance = new BigDecimal("-1");
         try{
-            Account account = getAccountByUserId(authenticatedUser);
-            ResponseEntity<BigDecimal> response = restTemplate.exchange(baseURL + account.getAccountId(), HttpMethod.GET, entity, BigDecimal.class);
+            ResponseEntity<BigDecimal> response = restTemplate.exchange(baseURL+ "account",
+                    HttpMethod.GET, entity, BigDecimal.class);
             balance = response.getBody();
             if(balance.compareTo(BigDecimal.ZERO)< 0){
                 throw new RuntimeException("Unable to retrieve balance");
@@ -49,6 +54,38 @@ public class TransferService {
             BasicLogger.log(e.getMessage());
         }
         return balance;
+    }
+
+
+    public List<User> getAllUsers (AuthenticatedUser authenticatedUser){
+
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
+
+        ResponseEntity<User[]> users = restTemplate.exchange(baseURL + "account",
+                HttpMethod.GET, entity, User[].class);
+
+        List<User> allUsers = Arrays.asList(users.getBody());
+        return allUsers;
+    }
+    public void printAllUsers(AuthenticatedUser authenticatedUser){
+        List<User> users = getAllUsers(authenticatedUser);
+        for(User user : users ){
+            if(user.getUsername() != authenticatedUser.getUser().getUsername()){
+                System.out.println(user.getId());
+            }
+        }
+
+    }
+    public boolean validUserSelected(String selectedUserName, AuthenticatedUser authenticatedUser){
+        List<User> users = getAllUsers(authenticatedUser);
+        for(User user : users){
+            if(user.getUsername().equals(selectedUserName)){
+                if(!user.getUsername().equals(authenticatedUser.getUser().getUsername())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private HttpEntity<Void> makeVoidEntity (AuthenticatedUser authUser){

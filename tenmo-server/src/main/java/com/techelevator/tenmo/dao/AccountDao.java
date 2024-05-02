@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 public interface AccountDao {
 
-    BigDecimal getBalanceById(int accountId);
+    BigDecimal getBalanceByUser(String userName);
     int getAccountId(int userId);
 
-    BigDecimal updateBalanceById(int accountId, BigDecimal amountChanged);
+    BigDecimal updateBalanceById(String userName, BigDecimal amountChanged);
 
 }

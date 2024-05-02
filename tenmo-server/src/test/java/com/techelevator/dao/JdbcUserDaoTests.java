@@ -74,13 +74,13 @@ public class JdbcUserDaoTests extends BaseDaoTests {
 
     @Test
     public void findAll_returns_all_users() {
-        List<User> users = sut.findAll();
+        User[] users = sut.findAll();
 
         Assert.assertNotNull(users);
-        Assert.assertEquals(3, users.size());
-        Assert.assertEquals(USER_1, users.get(0));
-        Assert.assertEquals(USER_2, users.get(1));
-        Assert.assertEquals(USER_3, users.get(2));
+        Assert.assertEquals(3, users.length);
+        Assert.assertEquals(USER_1, users[0]);
+        Assert.assertEquals(USER_2, users[1]);
+        Assert.assertEquals(USER_3, users[2]);
     }
 
     @Test(expected = DataIntegrityViolationException.class)

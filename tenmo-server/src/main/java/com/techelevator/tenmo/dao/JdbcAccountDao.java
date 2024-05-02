@@ -1,17 +1,10 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.Utilities.Utility;
-import com.techelevator.tenmo.exception.DaoException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 
 @Component
 public class JdbcAccountDao implements AccountDao {
@@ -25,11 +18,12 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public BigDecimal getBalanceById(int accountId) {
-        String sql = "SELECT balance FROM account WHERE account_id = ?";
+    public BigDecimal getBalanceByUser(String userName) {
+        String sql = "SELECT balance FROM account JOIN tenmo_user ON tenmo_user.user_id = account.user_id " +
+                "WHERE username = ?";
         BigDecimal balance = BigDecimal.ZERO;
         try {
-            Integer result = jdbcTemplate.queryForObject(sql, Integer.class, accountId);
+            Integer result = jdbcTemplate.queryForObject(sql, Integer.class, userName);
 
             if (result != null) {
                 balance = BigDecimal.valueOf(result);
@@ -56,15 +50,15 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public BigDecimal updateBalanceById(int accountId, BigDecimal amountChanged) {
+    public BigDecimal updateBalanceById(String userName, BigDecimal amountChanged) {
         String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
-        BigDecimal startingBalance = getBalanceById(accountId);
+        BigDecimal startingBalance = getBalanceByUser(userName);
         BigDecimal newBalance = startingBalance.add(amountChanged);
         double updatedBalance = newBalance.doubleValue();
         BigDecimal convertedBalance = null;
 
         try {
-            Integer result = jdbcTemplate.queryForObject(sql, Integer.class, updatedBalance, accountId);
+            Integer result = jdbcTemplate.queryForObject(sql, Integer.class, updatedBalance, userName);
             convertedBalance = new BigDecimal(result);
 
         } catch (Exception ex) {
