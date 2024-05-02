@@ -1,14 +1,12 @@
 package com.techelevator.tenmo.model;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Account {
 
-    private final int accountId;
-    private final int userId;
-    @NotNull(message = "Initial balance is required.")
+    private int accountId;
+    private int userId;
     private BigDecimal balance;
 
     public Account(int accountId, int userId, BigDecimal balance) {
