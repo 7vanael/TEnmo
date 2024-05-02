@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.Utilities.Utility;
 import com.techelevator.tenmo.exception.DaoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -35,7 +36,7 @@ public class JdbcAccountDao implements AccountDao {
             }
 
         } catch (Exception ex) {
-            handleDbException(ex, "get balance");
+            Utility.handleDbException(ex, "get balance");
         }
         return balance;
     }
@@ -49,7 +50,7 @@ public class JdbcAccountDao implements AccountDao {
             result = jdbcTemplate.queryForObject(sql, Integer.class, userId);
 
         } catch (Exception ex) {
-            handleDbException(ex, "get account id");
+            Utility.handleDbException(ex, "get account id");
         }
         return result;
     }
@@ -67,24 +68,24 @@ public class JdbcAccountDao implements AccountDao {
             convertedBalance = new BigDecimal(result);
 
         } catch (Exception ex) {
-            handleDbException(ex, "get account id");
+            Utility.handleDbException(ex, "get account id");
         }
         return convertedBalance;
     }
 
-    public void handleDbException(Exception ex, String verb) {
-        if (ex instanceof CannotGetJdbcConnectionException) {
-            throw new DaoException("Could not connect to database: "
-                    + ex.getMessage(), ex);
-        } else if (ex instanceof BadSqlGrammarException) {
-            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
-        } else if (ex instanceof SQLException) {
-            throw new DaoException("SQL exception" + ex.getMessage(), ex);
-        } else if (ex instanceof DataIntegrityViolationException) {
-            throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
-        } else {
-            throw new DaoException("Could not " + verb + ex.getMessage());
-        }
-    }
+//    public void handleDbException(Exception ex, String verb) {
+//        if (ex instanceof CannotGetJdbcConnectionException) {
+//            throw new DaoException("Could not connect to database: "
+//                    + ex.getMessage(), ex);
+//        } else if (ex instanceof BadSqlGrammarException) {
+//            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
+//        } else if (ex instanceof SQLException) {
+//            throw new DaoException("SQL exception" + ex.getMessage(), ex);
+//        } else if (ex instanceof DataIntegrityViolationException) {
+//            throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
+//        } else {
+//            throw new DaoException("Could not " + verb + ex.getMessage());
+//        }
+//    }
 
 }

@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.Utilities.Utility;
 import com.techelevator.tenmo.dao.JdbcAccountDao;
 import com.techelevator.tenmo.exception.DaoException;
 import com.techelevator.tenmo.model.Transfer;
@@ -43,7 +44,7 @@ public class JdbcTransferDao implements TransferDao{
                     fromAccount, toAccount, amount);
 
         } catch (DaoException ex) {
-            handleDbException(ex, "create transfer");
+            Utility.handleDbException(ex, "create transfer");
         }
         return transferId;
     }
@@ -56,7 +57,7 @@ public class JdbcTransferDao implements TransferDao{
         try {
             transferList = jdbcTemplate.query(sql, new TransferRowMapper(), transferStatusId, accountId, accountId);
         } catch (DaoException ex){
-            handleDbException(ex, "get transfers by status");
+            Utility.handleDbException(ex, "get transfers by status");
         }
         return transferList;
     }
@@ -70,7 +71,7 @@ public class JdbcTransferDao implements TransferDao{
         try{
             transfer = jdbcTemplate.queryForObject(sql, new TransferRowMapper(), transferId, userId, userId);
         }catch (DaoException ex){
-            handleDbException(ex,"get transfer by transfer ID");
+            Utility.handleDbException(ex, "get transfer by transfer ID");
         }
         return transfer;
     }
@@ -87,20 +88,20 @@ public class JdbcTransferDao implements TransferDao{
     }
 
 
-    public void handleDbException(Exception ex, String verb) {
-        if (ex instanceof CannotGetJdbcConnectionException) {
-            throw new DaoException("Could not connect to database: "
-                    + ex.getMessage(), ex);
-        } else if (ex instanceof BadSqlGrammarException) {
-            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
-        }else if (ex instanceof SQLException){
-            throw new DaoException("SQL exception" + ex.getMessage(), ex);
-        } else if (ex instanceof DataIntegrityViolationException) {
-            throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
-        } else {
-            throw new DaoException("Could not " + verb + ex.getMessage());
-        }
-    }
+//    public void handleDbException(Exception ex, String verb) {
+//        if (ex instanceof CannotGetJdbcConnectionException) {
+//            throw new DaoException("Could not connect to database: "
+//                    + ex.getMessage(), ex);
+//        } else if (ex instanceof BadSqlGrammarException) {
+//            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
+//        }else if (ex instanceof SQLException){
+//            throw new DaoException("SQL exception" + ex.getMessage(), ex);
+//        } else if (ex instanceof DataIntegrityViolationException) {
+//            throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
+//        } else {
+//            throw new DaoException("Could not " + verb + ex.getMessage());
+//        }
+//    }
 
 
 }

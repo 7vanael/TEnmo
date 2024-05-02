@@ -21,6 +21,6 @@ public interface TransferDao {
 
     String requestMoney(BigDecimal amountRequested, int requesterUserId, int requesteeUserId);
 
-    void handleDbException(Exception ex, String verb);
+//    void handleDbException(Exception ex, String verb);
 
 }
