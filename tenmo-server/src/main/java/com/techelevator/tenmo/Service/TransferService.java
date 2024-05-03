@@ -57,7 +57,7 @@ public class TransferService {
             sufficientFunds = true;
         }
 
-        accountIdNotTheSame = fromAccount.equals(toAccount);
+        accountIdNotTheSame = !fromAccount.equals(toAccount);
         String userName = principal.getName();
         int loggedInUserAccountId = accountDao.getAccountId(userDao.findByUsername(userName).getId());
 
@@ -74,7 +74,7 @@ public class TransferService {
         }
         BigDecimal updatedSourceBalance = null;
         BigDecimal updatedDestinationBalance = null;
-        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && sendingToOtherAccount){
+        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && !sendingToOtherAccount){
             BigDecimal debit = transfer.getTransferAmount().multiply(new BigDecimal("-1"));
             accountDao.updateBalanceByUser(fromUser.getUsername(), debit);
             accountDao.updateBalanceByUser(toUser.getUsername(), transfer.getTransferAmount());

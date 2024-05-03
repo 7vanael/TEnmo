@@ -55,12 +55,12 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public void updateBalanceByUser(String userName, BigDecimal amountChanged) {
+    public BigDecimal updateBalanceByUser(String userName, BigDecimal amountChanged) {
         String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
         BigDecimal startingBalance = getBalanceByUser(userName);
         BigDecimal newBalance = startingBalance.add(amountChanged);
         //converted to double to avoid sending BigDecimal into Sql
-        double updatedBalance = newBalance.doubleValue();
+        //double updatedBalance = newBalance.doubleValue();
 
         try {
             int userId = userDao.findIdByUsername(userName);
@@ -71,7 +71,7 @@ public class JdbcAccountDao implements AccountDao {
         } catch (Exception ex) {
             Utility.handleDbException(ex, "update balance by user");
         }
-
+        return getBalanceByUser(userName);
     }
 
     @Override
