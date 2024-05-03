@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.Utilities.Utility;
+import com.techelevator.tenmo.exception.DaoException;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.rowMapper.AccountRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -87,6 +88,21 @@ public class JdbcAccountDao implements AccountDao {
             Utility.handleDbException(ex, "get account by account id ");
         }
         return result;
+    }
+
+    public String getUsernameByAccountId(int accountId){
+        String username = "";
+        String sql = "SELECT username FROM account a\n" +
+                "JOIN tenmo_user tu ON a.user_id = tu.user_id\n" +
+                "WHERE account_id = ?;";
+
+        try {
+            username = jdbcTemplate.queryForObject(sql, String.class, accountId);
+
+        } catch (DaoException ex){
+            Utility.handleDbException(ex, "get username by account id");
+        }
+        return username;
     }
 
     public Account mapRowAccount (SqlRowSet rowset){

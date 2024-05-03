@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.security.Principal;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +25,15 @@ public class JdbcTransferDao implements TransferDao{
 
     private final JdbcTemplate jdbcTemplate;
     private final JdbcAccountDao jdbcAccountDao;
+    private final TransferRowMapper transferRowMapper;
+    private final JdbcUserDao jdbcUserDao;
 
-    public JdbcTransferDao(JdbcTemplate jdbcTemplate, JdbcAccountDao jdbcAccountDao) {
+    public JdbcTransferDao(JdbcTemplate jdbcTemplate, JdbcAccountDao jdbcAccountDao,
+                           TransferRowMapper transferRowMapper, JdbcUserDao jdbcUserDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcAccountDao = jdbcAccountDao;
+        this.transferRowMapper = transferRowMapper;
+        this.jdbcUserDao = jdbcUserDao;
     }
 
     @Override
@@ -48,7 +55,21 @@ public class JdbcTransferDao implements TransferDao{
         }
         return transferId;
     }
+    //get transfer by accountId, check logic below for query structure
+    @Override
+    public Transfer[] getTransferArrayByAccountId(Principal principal){
+        List<Transfer> transferList = new ArrayList<>();
+        String sql = "SELECT * FROM transfer WHERE account_from = ? OR account_to = ?;";
+        int accountId = jdbcAccountDao.getAccountId(jdbcUserDao.findIdByUsername(principal.getName()));
+        try {
+            transferList = jdbcTemplate.query(sql, new TransferRowMapper(), accountId, accountId);
 
+        } catch (DaoException ex){
+            Utility.handleDbException(ex, "get transfer array by account id");
+        }
+        Transfer[] convertedList = transferList.toArray(new Transfer[0]);
+        return convertedList;
+    }
     @Override
     public List<Transfer> getTransfersByStatus(int transferStatusId, int accountId) {
         List<Transfer> transferList = new ArrayList<>();
@@ -61,7 +82,7 @@ public class JdbcTransferDao implements TransferDao{
         }
         return transferList;
     }
-
+    //use for feature 6.
     @Override
     public Transfer getTransferByTransferId(int transferId, int userId) {
         Transfer transfer = new Transfer();

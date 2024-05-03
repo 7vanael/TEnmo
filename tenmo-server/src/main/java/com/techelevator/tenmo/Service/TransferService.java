@@ -96,5 +96,13 @@ public class TransferService {
 //
 //    }
 
+    //add getTransferByAccountId. principle needed?
+    public Transfer[] getTransferArrayByAccountId(Principal principal){
+        return transferDao.getTransferArrayByAccountId(principal);
+    }
+
+    public String getUsernameByAccountId(int accountId){
+        return accountDao.getUsernameByAccountId(accountId);
+    }
 
 }

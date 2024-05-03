@@ -146,6 +146,60 @@ public class TransferService {
         return null;
     }
 
+    public String getUsernameByUserId(AuthenticatedUser authenticatedUser, int userId){
+        List<User> users = getAllUsers(authenticatedUser);
+        for(User user : users){
+            if(user.getId() == userId){
+                return user.getUsername();
+            }
+        }
+        return null;
+    }
+
+    public String getUsernameByAccountId(int accountId, AuthenticatedUser authenticatedUser){
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
+        String username = "";
+
+        try{
+            ResponseEntity<String> responseEntity = restTemplate.exchange(baseURL + "user/" + accountId,
+                    HttpMethod.GET, entity, String.class);
+            username = responseEntity.getBody();
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+
+        return username;
+    }
+    //make call to api to getTransferArrayByAccountId
+    public List<Transfer> printTransferListByAccountId(AuthenticatedUser authenticatedUser){
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
+        ResponseEntity<Transfer[]> transferList = restTemplate.exchange(baseURL +
+                "transfer", HttpMethod.GET, entity, Transfer[].class);
+        List<Transfer> results = Arrays.asList(transferList.getBody());
+        System.out.println("-------------------------------");
+        System.out.println("Transfers");
+        System.out.println("ID " + "From/To " + "Amount");
+        System.out.println("-------------------------------");
+        for(Transfer transfer : results){
+
+            String toFrom = "";
+            String username = "";
+            if(transfer.getAccountFrom() == getAccountByUserId(authenticatedUser).getAccountId()){
+                toFrom = " To: ";
+                username = getUsernameByAccountId(transfer.getAccountTo(), authenticatedUser);
+            } else {
+                toFrom = " From: ";
+                username = getUsernameByAccountId(transfer.getAccountFrom(), authenticatedUser);
+            }
+
+            //System.out.println("Id: " + transfer.getTransferId());
+            System.out.println(transfer.getTransferId() + toFrom + username + " $" + transfer.getTransferAmount());
+
+        }
+        System.out.println("---------");
+        return results;
+    }
+
     private HttpEntity<Void> makeVoidEntity (AuthenticatedUser authUser){
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(authUser.getToken());

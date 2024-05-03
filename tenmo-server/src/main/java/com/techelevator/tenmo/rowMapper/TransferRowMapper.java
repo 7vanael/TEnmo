@@ -1,10 +1,13 @@
 package com.techelevator.tenmo.rowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import com.techelevator.tenmo.model.Transfer;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+@Component
 public class TransferRowMapper implements RowMapper<Transfer>{
     @Override
     public Transfer mapRow(ResultSet result , int i) throws SQLException{

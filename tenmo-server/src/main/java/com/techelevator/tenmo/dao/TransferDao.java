@@ -3,6 +3,7 @@ package com.techelevator.tenmo.dao;
 import com.techelevator.tenmo.model.Transfer;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.List;
 
 public interface TransferDao {
@@ -22,5 +23,7 @@ public interface TransferDao {
     String requestMoney(BigDecimal amountRequested, int requesterUserId, int requesteeUserId);
 
 //    void handleDbException(Exception ex, String verb);
+    // add getTransferById to interface for view past transfers feature
+    Transfer[] getTransferArrayByAccountId(Principal principal);
 
 }

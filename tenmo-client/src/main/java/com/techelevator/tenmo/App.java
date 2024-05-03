@@ -133,7 +133,8 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
+        //implement api call method to getTransferArrayByAccountId
+        transferService.printTransferListByAccountId(currentUser);
 		
 	}
 

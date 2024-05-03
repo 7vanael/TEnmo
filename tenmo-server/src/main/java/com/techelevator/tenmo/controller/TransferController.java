@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -36,9 +35,14 @@ public class TransferController {
     public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
         return transferService.createTransfer(transfer, principal);
     }
-//    @RequestMapping(value = "transfer", method = RequestMethod.GET)
-//    public Transfer[] getAllTransfers(Principal principal){
-//        return transferService.getAllTransfers(transfer, principal);
-//    }
+    @RequestMapping(value = "transfer", method = RequestMethod.GET)
+    public Transfer[] getTransferArrayByAccountId(Principal principal){
+        return transferService.getTransferArrayByAccountId(principal);
+    }
+
+    @RequestMapping(value = "user/{id}", method = RequestMethod.GET)
+    public String getUsernameByAccountId(@PathVariable int id){
+        return transferService.getUsernameByAccountId(id);
+    }
 
 }
