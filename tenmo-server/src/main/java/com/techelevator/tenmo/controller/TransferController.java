@@ -1,10 +1,12 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.Service.TransferService;
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
@@ -30,5 +32,9 @@ public class TransferController {
         return transferService.findAllUsers();
     }
 
+    @RequestMapping(value = "transfer", method = RequestMethod.POST)
+    public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
+        return transferService.createTransfer(transfer, principal);
+    }
 
 }

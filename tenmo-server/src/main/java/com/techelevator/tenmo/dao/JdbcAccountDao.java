@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.Utilities.Utility;
+import com.techelevator.tenmo.model.Account;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public BigDecimal updateBalanceById(String userName, BigDecimal amountChanged) {
+    public BigDecimal updateBalanceByUser(String userName, BigDecimal amountChanged) {
         String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
         BigDecimal startingBalance = getBalanceByUser(userName);
         BigDecimal newBalance = startingBalance.add(amountChanged);
@@ -62,9 +63,21 @@ public class JdbcAccountDao implements AccountDao {
             convertedBalance = new BigDecimal(result);
 
         } catch (Exception ex) {
-            Utility.handleDbException(ex, "get account id");
+            Utility.handleDbException(ex, "update balance by user");
         }
         return convertedBalance;
+    }
+
+    @Override
+    public Account getAccountByAccountId(int accountId){
+        String sql = "SELECT * FROM account WHERE account_id = ?";
+        Account result = null;
+        try {
+            result = jdbcTemplate.queryForObject(sql, Account.class, accountId);
+        }catch (Exception ex) {
+            Utility.handleDbException(ex, "get account by account id");
+        }
+        return result;
     }
 
 //    public void handleDbException(Exception ex, String verb) {

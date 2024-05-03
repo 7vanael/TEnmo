@@ -23,6 +23,8 @@ public class TransferService {
     private Account account;
     private User user;
 
+    private final int TRANSFER_TYPE_SEND = 2;
+
 
     public TransferService(String baseURL){
         this.baseURL = baseURL;
@@ -67,6 +69,7 @@ public class TransferService {
         List<User> allUsers = Arrays.asList(users.getBody());
         return allUsers;
     }
+
     public void printAllUsers(AuthenticatedUser authenticatedUser){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users ){
@@ -76,6 +79,7 @@ public class TransferService {
         }
 
     }
+
     public boolean validUserSelected(String selectedUserName, AuthenticatedUser authenticatedUser){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users){
@@ -86,6 +90,31 @@ public class TransferService {
             }
         }
         return false;
+    }
+
+    public Transfer createTransaction(int transferType, AuthenticatedUser authenticatedUser,
+                                      String targetUser, BigDecimal transferAmount){
+        //for challenge determine transfer_type_id will determine which account is too or from
+        Transfer transfer = new Transfer();
+        transfer.setTransferTypeId(TRANSFER_TYPE_SEND);
+        transfer.setTransferAmount(transferAmount);
+        transfer.setAccountFrom(authenticatedUser.getUser().getId());
+        try {
+            transfer.setAccountTo(getUserByUserName(authenticatedUser, targetUser).getId());
+        } catch (NullPointerException ex){
+            throw new RuntimeException("Could not find user.");
+        }
+        return transfer;
+    }
+
+    public User getUserByUserName(AuthenticatedUser authenticatedUser, String username){
+        List<User> users = getAllUsers(authenticatedUser);
+        for(User user : users){
+            if(username.equals(user.getUsername())){
+                return user;
+            }
+        }
+        return null;
     }
 
     private HttpEntity<Void> makeVoidEntity (AuthenticatedUser authUser){

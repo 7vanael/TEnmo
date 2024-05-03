@@ -91,26 +91,16 @@ public class App {
         System.out.println("Select a user name to Initiate a Transfer: \n");
         transferService.printAllUsers(currentUser);
         boolean validUser = false;
+        String targetUser = "";
         while(!validUser) {
-            String targetUser = consoleService.promptForString("Enter the username for the transfer:");
+            targetUser = consoleService.promptForString("Enter the username for the transfer: ");
 
             if(transferService.validUserSelected(targetUser, currentUser)){
                 validUser = true;
             }
         }
-//            while (menuSelection != 0 && currentUser == null) {
-//            consoleService.printLoginMenu();
-//            menuSelection = consoleService.promptForMenuSelection("Please choose an option: ");
-//            if (menuSelection == 1) {
-//                handleRegister();
-//            } else if (menuSelection == 2) {
-//                handleLogin();
-//            } else if (menuSelection != 0) {
-//                System.out.println("Invalid Selection");
-//                consoleService.pause();
-//            }
-
-
+        BigDecimal transferAmount = consoleService.promptForBigDecimal("Please enter the transfer amount: ");
+        transferService.createTransaction(2, currentUser, targetUser, transferAmount);
     }
 
 	private void viewCurrentBalance() {
@@ -130,7 +120,7 @@ public class App {
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
+		startSend();
 		
 	}
 
