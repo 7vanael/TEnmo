@@ -9,7 +9,7 @@ public interface AccountDao {
     BigDecimal getBalanceByUser(String userName);
     int getAccountId(int userId);
 
-    BigDecimal updateBalanceByUser(String userName, BigDecimal amountChanged);
+    void updateBalanceByUser(String userName, BigDecimal amountChanged);
 
     Account getAccountByAccountId(int accountId);
 

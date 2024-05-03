@@ -74,18 +74,14 @@ public class TransferService {
         }
         BigDecimal updatedSourceBalance = null;
         BigDecimal updatedDestinationBalance = null;
-//        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && sendingToOtherAccount){
+        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && sendingToOtherAccount){
             BigDecimal debit = transfer.getTransferAmount().multiply(new BigDecimal("-1"));
-            updatedSourceBalance =  accountDao.updateBalanceByUser(fromUser.getUsername(), debit);
-            updatedDestinationBalance =  accountDao.updateBalanceByUser(toUser.getUsername(), transfer.getTransferAmount());
-//        }
-        //The triple check
-//        if((updatedSourceBalance != null && updatedDestinationBalance != null) &&
-//                ((updatedSourceBalance.compareTo(BigDecimal.ZERO)<0 || updatedSourceBalance.compareTo(BigDecimal.ZERO)<0))){
-//
-//        }else{
-//            System.out.println("Whoops, that triple check was a bad idea!");
-//        }
+            accountDao.updateBalanceByUser(fromUser.getUsername(), debit);
+            accountDao.updateBalanceByUser(toUser.getUsername(), transfer.getTransferAmount());
+            updatedSourceBalance = fromAccount.getBalance();
+            updatedDestinationBalance = toAccount.getBalance();
+        }
+
         int transferId = transferDao.createTransfer(transfer.getTransferTypeId(),
                 transfer.getTransferStatusId(), transfer.getAccountFrom(), transfer.getAccountTo(),
                 transfer.getTransferAmount());
