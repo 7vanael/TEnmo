@@ -2,7 +2,9 @@ package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.Utilities.Utility;
 import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.rowMapper.AccountRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -11,10 +13,12 @@ import java.math.BigDecimal;
 public class JdbcAccountDao implements AccountDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserDao userDao;
     //private final DaoException daoException;
 
-    public JdbcAccountDao(JdbcTemplate jdbcTemplate) { //DaoException daoException) {
+    public JdbcAccountDao(JdbcTemplate jdbcTemplate, UserDao userDao) { //DaoException daoException) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userDao = userDao;
        // this.daoException = daoException;
     }
 
@@ -55,17 +59,20 @@ public class JdbcAccountDao implements AccountDao {
         String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
         BigDecimal startingBalance = getBalanceByUser(userName);
         BigDecimal newBalance = startingBalance.add(amountChanged);
+        //converted to double to avoid sending BigDecimal into Sql
         double updatedBalance = newBalance.doubleValue();
-        BigDecimal convertedBalance = null;
+        BigDecimal result = null;
 
         try {
-            Integer result = jdbcTemplate.queryForObject(sql, Integer.class, updatedBalance, userName);
-            convertedBalance = new BigDecimal(result);
+            int userId = userDao.findIdByUsername(userName);
+            int accountId = getAccountId(userId);
+            result = jdbcTemplate.queryForObject(sql, BigDecimal.class, newBalance, accountId);
+//            convertedBalance = new BigDecimal(result);
 
         } catch (Exception ex) {
             Utility.handleDbException(ex, "update balance by user");
         }
-        return convertedBalance;
+        return result;
     }
 
     @Override
@@ -73,11 +80,22 @@ public class JdbcAccountDao implements AccountDao {
         String sql = "SELECT * FROM account WHERE account_id = ?";
         Account result = null;
         try {
-            result = jdbcTemplate.queryForObject(sql, Account.class, accountId);
+            SqlRowSet resultSet = jdbcTemplate.queryForRowSet(sql, accountId);
+            while(resultSet.next()){
+                result = mapRowAccount(resultSet);
+            }
         }catch (Exception ex) {
-            Utility.handleDbException(ex, "get account by account id");
+            Utility.handleDbException(ex, "get account by account id ");
         }
         return result;
+    }
+
+    public Account mapRowAccount (SqlRowSet rowset){
+        return new Account(
+                rowset.getInt("account_id"),
+                rowset.getInt("user_id"),
+                rowset.getBigDecimal("balance")
+        );
     }
 
 //    public void handleDbException(Exception ex, String verb) {

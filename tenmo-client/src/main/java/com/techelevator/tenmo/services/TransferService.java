@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.net.http.HttpResponse;
 import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +23,6 @@ public class TransferService {
     private AuthenticatedUser authenticatedUser;
     private Account account;
     private User user;
-
-    private final int TRANSFER_TYPE_SEND = 2;
 
 
     public TransferService(String baseURL){
@@ -63,7 +62,7 @@ public class TransferService {
 
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
 
-        ResponseEntity<User[]> users = restTemplate.exchange(baseURL + "account",
+        ResponseEntity<User[]> users = restTemplate.exchange(baseURL + "users",
                 HttpMethod.GET, entity, User[].class);
 
         List<User> allUsers = Arrays.asList(users.getBody());
@@ -73,8 +72,8 @@ public class TransferService {
     public void printAllUsers(AuthenticatedUser authenticatedUser){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users ){
-            if(user.getUsername() != authenticatedUser.getUser().getUsername()){
-                System.out.println(user.getId());
+            if(!user.getUsername().equalsIgnoreCase(authenticatedUser.getUser().getUsername())){
+                System.out.println(user.getUsername());
             }
         }
 
@@ -90,13 +89,36 @@ public class TransferService {
             }
         }
         return false;
+
+    }
+    public boolean validAmountEntered(BigDecimal transferAmount, AuthenticatedUser authenticatedUser, Boolean send) {
+
+        boolean validNumber = transferAmount.compareTo(BigDecimal.ZERO)>0;
+        boolean sufficientfunds = false;
+        if(send) {
+            BigDecimal balance = getBalanceByUser(authenticatedUser);
+            sufficientfunds = (balance.compareTo(transferAmount) >= 0);
+        }else{
+            sufficientfunds = true;
+        }
+        return (validNumber && sufficientfunds);
     }
 
-    public Transfer createTransaction(int transferType, AuthenticatedUser authenticatedUser,
-                                      String targetUser, BigDecimal transferAmount){
-        //for challenge determine transfer_type_id will determine which account is too or from
+
+
+
+
+
+    public void createTransaction(boolean isSend, AuthenticatedUser authenticatedUser,
+                                  String targetUser, BigDecimal transferAmount){
+        //Create a transfer object from parameters
         Transfer transfer = new Transfer();
-        transfer.setTransferTypeId(TRANSFER_TYPE_SEND);
+        if(isSend){
+            transfer.setTransferTypeId(transfer.TRANSFER_TYPE_SEND);
+        }else{
+            transfer.setTransferTypeId(transfer.TRANSFER_TYPE_REQUEST);
+        }
+        transfer.setTransferStatusId(transfer.TRANSFER_STATUS_APPROVED);
         transfer.setTransferAmount(transferAmount);
         transfer.setAccountFrom(authenticatedUser.getUser().getId());
         try {
@@ -104,7 +126,14 @@ public class TransferService {
         } catch (NullPointerException ex){
             throw new RuntimeException("Could not find user.");
         }
-        return transfer;
+        //Send the transfer object to the server!
+        HttpEntity<Transfer> entity = makeTransferEntity(transfer, authenticatedUser);
+        ResponseEntity<Transfer> response = restTemplate.exchange(baseURL + "transfer",
+                    HttpMethod.POST, entity, Transfer.class);
+        if(response.getBody().getTransferId()>0){
+            System.out.println("Transfer was successfully completed!");
+        }
+
     }
 
     public User getUserByUserName(AuthenticatedUser authenticatedUser, String username){

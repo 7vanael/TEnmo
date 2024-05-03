@@ -4,6 +4,13 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Transfer {
+    public final int TRANSFER_STATUS_PENDING = 1;
+    public final int TRANSFER_STATUS_APPROVED = 2;
+    public final int TRANSFER_STATUS_REJECTED = 3;
+
+    public final int TRANSFER_TYPE_REQUEST = 1;
+    public final int TRANSFER_TYPE_SEND = 2;
+
 
     private int transferId;
     private int transferTypeId;
@@ -11,6 +18,8 @@ public class Transfer {
     private int accountFrom;
     private int accountTo;
     private BigDecimal transferAmount;
+
+
     public Transfer(){}
     public Transfer(int transferId, int transferTypeId, int transferStatusId,
                     int accountFrom, int accountTo, BigDecimal transferAmount) {

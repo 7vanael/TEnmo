@@ -18,6 +18,10 @@ public class App {
 
     private AuthenticatedUser currentUser;
 
+
+
+
+
     public static void main(String[] args) {
         App app = new App();
         app.run();
@@ -87,20 +91,39 @@ public class App {
             consoleService.pause();
         }
     }
+
+    //If we have time: we should pull more of this method out into the TransferService/Console Service
+    // so this method can look more like a series of calls to other methods in other services.
     private void startSend() {
+        boolean isSend = true;
+        System.out.println();
         System.out.println("Select a user name to Initiate a Transfer: \n");
         transferService.printAllUsers(currentUser);
         boolean validUser = false;
         String targetUser = "";
         while(!validUser) {
-            targetUser = consoleService.promptForString("Enter the username for the transfer: ");
+            targetUser = consoleService.promptForString("Enter a valid username for the transfer: ");
 
             if(transferService.validUserSelected(targetUser, currentUser)){
                 validUser = true;
             }
         }
-        BigDecimal transferAmount = consoleService.promptForBigDecimal("Please enter the transfer amount: ");
-        transferService.createTransaction(2, currentUser, targetUser, transferAmount);
+
+        boolean validAmount = false;
+        BigDecimal transferAmount = BigDecimal.ZERO;
+        while(!validAmount) {
+            transferAmount = consoleService.promptForBigDecimal("Please enter a transfer amount " +
+                    "(cannot be negative or greater than your balance): ");
+
+            if(transferService.validAmountEntered(transferAmount, currentUser, isSend)){
+                validAmount = true;
+            }
+        }
+
+        transferService.createTransaction(isSend, currentUser, targetUser, transferAmount);
+        BigDecimal balance = transferService.getBalanceByUser(currentUser);
+        System.out.println();
+        System.out.println("Your new balance is: " + balance);
     }
 
 	private void viewCurrentBalance() {

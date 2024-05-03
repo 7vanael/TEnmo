@@ -27,7 +27,7 @@ public class TransferController {
         return transferService.getBalanceByUser(userName);
     }
 
-    @GetMapping(value = "account")
+    @GetMapping(value = "users")
     public User[] findAllUsers(){
         return transferService.findAllUsers();
     }
@@ -36,5 +36,9 @@ public class TransferController {
     public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
         return transferService.createTransfer(transfer, principal);
     }
+//    @RequestMapping(value = "transfer", method = RequestMethod.GET)
+//    public Transfer[] getAllTransfers(Principal principal){
+//        return transferService.getAllTransfers(transfer, principal);
+//    }
 
 }

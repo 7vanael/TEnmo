@@ -37,8 +37,8 @@ public class TransferService {
 
     @Transactional
     public Transfer createTransfer(Transfer transfer, Principal principal){
-        Account fromAccount = accountDao.getAccountByAccountId(transfer.getAccountFrom());
-        Account toAccount = accountDao.getAccountByAccountId(transfer.getAccountTo());
+        Account fromAccount = accountDao.getAccountByAccountId(accountDao.getAccountId(transfer.getAccountFrom()));
+        Account toAccount = accountDao.getAccountByAccountId(accountDao.getAccountId(transfer.getAccountTo()));
         User fromUser = userDao.getUserById(fromAccount.getUserId());
         User toUser = userDao.getUserById(toAccount.getUserId());
 
@@ -72,20 +72,33 @@ public class TransferService {
                 sendingToOtherAccount = true;
             }
         }
-
-        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && sendingToOtherAccount){
+        BigDecimal updatedSourceBalance = null;
+        BigDecimal updatedDestinationBalance = null;
+//        if (notNull && sufficientFunds && amountIsPositive && accountIdNotTheSame && sendingToOtherAccount){
             BigDecimal debit = transfer.getTransferAmount().multiply(new BigDecimal("-1"));
-            accountDao.updateBalanceByUser(fromUser.getUsername(), debit);
-            accountDao.updateBalanceByUser(toUser.getUsername(), transfer.getTransferAmount());
-        }
-
+            updatedSourceBalance =  accountDao.updateBalanceByUser(fromUser.getUsername(), debit);
+            updatedDestinationBalance =  accountDao.updateBalanceByUser(toUser.getUsername(), transfer.getTransferAmount());
+//        }
+        //The triple check
+//        if((updatedSourceBalance != null && updatedDestinationBalance != null) &&
+//                ((updatedSourceBalance.compareTo(BigDecimal.ZERO)<0 || updatedSourceBalance.compareTo(BigDecimal.ZERO)<0))){
+//
+//        }else{
+//            System.out.println("Whoops, that triple check was a bad idea!");
+//        }
         int transferId = transferDao.createTransfer(transfer.getTransferTypeId(),
                 transfer.getTransferStatusId(), transfer.getAccountFrom(), transfer.getAccountTo(),
                 transfer.getTransferAmount());
 
         transfer.setTransferId(transferId);
+
         return transfer;
     }
+
+//    public Transfer[] getAllTransfers(Principal principal){
+//        Transfer[] Transfers;
+//
+//    }
 
 
 }
