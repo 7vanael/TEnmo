@@ -90,6 +90,21 @@ public class JdbcAccountDao implements AccountDao {
         return result;
     }
 
+    @Override
+    public Account getAccountByUserId(int userId) {
+        String sql = "SELECT * FROM account WHERE user_id = ?;";
+        Account account = new Account();
+        try{
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+            while(results.next()){
+                account = mapRowAccount(results);
+            }
+        } catch (Exception ex) {
+            Utility.handleDbException(ex, "get account by user id");
+        }
+        return account;
+    }
+
     public String getUsernameByAccountId(int accountId){
         String username = "";
         String sql = "SELECT username FROM account a\n" +

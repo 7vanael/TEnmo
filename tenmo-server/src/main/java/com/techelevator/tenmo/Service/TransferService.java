@@ -8,6 +8,7 @@ import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -103,6 +104,10 @@ public class TransferService {
 
     public String getUsernameByAccountId(int accountId){
         return accountDao.getUsernameByAccountId(accountId);
+    }
+
+    public Account getAccountByUserId(@PathVariable int id){
+        return accountDao.getAccountByUserId(id);
     }
 
 }

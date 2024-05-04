@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.Service.TransferService;
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +44,11 @@ public class TransferController {
     @RequestMapping(value = "user/{id}", method = RequestMethod.GET)
     public String getUsernameByAccountId(@PathVariable int id){
         return transferService.getUsernameByAccountId(id);
+    }
+    //we know this is terrible, we're running out of time
+    @RequestMapping(value = "user/{id}/account", method = RequestMethod.GET)
+    public Account getAccountByUserId(@PathVariable int id){
+        return transferService.getAccountByUserId(id);
     }
 
 }

@@ -6,10 +6,12 @@ import java.util.Objects;
 
 public class Account {
 
-    private final int accountId;
-    private final int userId;
+    private int accountId;
+    private int userId;
     @NotNull(message = "Initial balance is required.")
     private BigDecimal balance;
+
+    public Account(){}
 
     public Account(int accountId, int userId, BigDecimal balance) {
         this.accountId = accountId;

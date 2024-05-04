@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Account;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 
@@ -14,6 +15,7 @@ public interface AccountDao {
     Account getAccountByAccountId(int accountId);
 
     String getUsernameByAccountId(int accountId);
+    Account getAccountByUserId(int userId);
 
 
 }

@@ -18,6 +18,11 @@ import java.util.List;
 
 public class TransferService {
 
+    public final int TRANSFER_STATUS_PENDING = 1;
+    public final int TRANSFER_STATUS_APPROVED = 2;
+    public final int TRANSFER_STATUS_REJECTED = 3;
+    public final int TRANSFER_TYPE_REQUEST = 1;
+    public final int TRANSFER_TYPE_SEND = 2;
     public final String baseURL;
     private final RestTemplate restTemplate = new RestTemplate();
     private AuthenticatedUser authenticatedUser;
@@ -30,12 +35,17 @@ public class TransferService {
     }
 
     public Account getAccountByUserId(AuthenticatedUser authenticatedUser){
+
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         Account account = null;
         try{
-            account = restTemplate.getForObject(baseURL + authenticatedUser.getUser().getId(), Account.class);
+           ResponseEntity<Account> responseEntity = restTemplate.exchange(baseURL + "user/"+
+                   authenticatedUser.getUser().getId() + "/account", HttpMethod.GET, entity, Account.class);
+           account = responseEntity.getBody();
         } catch (RestClientResponseException | ResourceAccessException e) {
             BasicLogger.log(e.getMessage());
         }
+
         return account;
     }
 
@@ -114,11 +124,11 @@ public class TransferService {
         //Create a transfer object from parameters
         Transfer transfer = new Transfer();
         if(isSend){
-            transfer.setTransferTypeId(transfer.TRANSFER_TYPE_SEND);
+            transfer.setTransferTypeId(TRANSFER_TYPE_SEND);
         }else{
-            transfer.setTransferTypeId(transfer.TRANSFER_TYPE_REQUEST);
+            transfer.setTransferTypeId(TRANSFER_TYPE_REQUEST);
         }
-        transfer.setTransferStatusId(transfer.TRANSFER_STATUS_APPROVED);
+        transfer.setTransferStatusId(TRANSFER_STATUS_APPROVED);
         transfer.setTransferAmount(transferAmount);
         transfer.setAccountFrom(authenticatedUser.getUser().getId());
         try {
@@ -175,21 +185,27 @@ public class TransferService {
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         ResponseEntity<Transfer[]> transferList = restTemplate.exchange(baseURL +
                 "transfer", HttpMethod.GET, entity, Transfer[].class);
-        List<Transfer> results = Arrays.asList(transferList.getBody());
+        Transfer[] body = transferList.getBody();
+        List<Transfer> results = Arrays.asList(body);
         System.out.println("-------------------------------");
         System.out.println("Transfers");
-        System.out.println("ID " + "From/To " + "Amount");
+        System.out.println("ID" + "   " + "From/To " + "   " + "Amount");
         System.out.println("-------------------------------");
         for(Transfer transfer : results){
 
             String toFrom = "";
             String username = "";
-            if(transfer.getAccountFrom() == getAccountByUserId(authenticatedUser).getAccountId()){
+            int fromAccountId = transfer.getAccountFrom();
+            int toAccountId = transfer.getAccountTo();
+            Account currentUserAccount = getAccountByUserId(authenticatedUser);
+            int currentUserAccountId = currentUserAccount.getAccountId();
+
+            if(fromAccountId == currentUserAccountId){
                 toFrom = " To: ";
-                username = getUsernameByAccountId(transfer.getAccountTo(), authenticatedUser);
+                username = getUsernameByAccountId(toAccountId, authenticatedUser);
             } else {
                 toFrom = " From: ";
-                username = getUsernameByAccountId(transfer.getAccountFrom(), authenticatedUser);
+                username = getUsernameByAccountId(fromAccountId, authenticatedUser);
             }
 
             //System.out.println("Id: " + transfer.getTransferId());

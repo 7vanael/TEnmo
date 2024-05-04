@@ -4,12 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Transfer {
-    public final int TRANSFER_STATUS_PENDING = 1;
-    public final int TRANSFER_STATUS_APPROVED = 2;
-    public final int TRANSFER_STATUS_REJECTED = 3;
 
-    public final int TRANSFER_TYPE_REQUEST = 1;
-    public final int TRANSFER_TYPE_SEND = 2;
 
 
     private int transferId;
