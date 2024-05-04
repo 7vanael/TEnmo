@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.List;
+
+//Yes, several of these would be better served in AccountService or User Service...
 
 @Service
 
@@ -36,6 +37,9 @@ public class TransferService {
         return userDao.findAll();
     }
 
+
+    //If we had multiple services, this would be easier to break out into calls to
+    //the User and Account services to make a smaller, more manageable method.
     @Transactional
     public Transfer createTransfer(Transfer transfer, Principal principal){
         Account fromAccount = accountDao.getAccountByAccountId(accountDao.getAccountId(transfer.getAccountFrom()));
@@ -92,14 +96,12 @@ public class TransferService {
         return transfer;
     }
 
-//    public Transfer[] getAllTransfers(Principal principal){
-//        Transfer[] Transfers;
-//
-//    }
-
-    //add getTransferByAccountId. principle needed?
     public Transfer[] getTransferArrayByAccountId(Principal principal){
         return transferDao.getTransferArrayByAccountId(principal);
+    }
+
+    public Transfer getTransferByTransferId(int transferId, Principal principal){
+        return transferDao.getTransferByTransferId(transferId, principal);
     }
 
     public String getUsernameByAccountId(int accountId){

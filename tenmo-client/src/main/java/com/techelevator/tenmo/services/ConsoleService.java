@@ -223,6 +223,12 @@ public class ConsoleService {
         System.out.println("0: Exit");
         System.out.println();
     }
+    public void printTransferDetailMenu(){
+        System.out.println();
+        System.out.println("1: View additional details by transfer ID");
+        System.out.println("0: Exit");
+        System.out.println();
+    }
 
     public UserCredentials promptForCredentials() {
         String username = promptForString("Username: ");

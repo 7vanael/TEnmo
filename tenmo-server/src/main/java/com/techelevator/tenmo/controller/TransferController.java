@@ -16,6 +16,9 @@ import java.security.Principal;
 public class TransferController {
 
     private final TransferService transferService;
+    //Like the client side, many of these calls should probably be split to
+    //the account controller. If we had more time, we might have
+    //made better organized structure of this side
 
     public TransferController(TransferService transferService){
         this.transferService = transferService;
@@ -40,6 +43,11 @@ public class TransferController {
     public Transfer[] getTransferArrayByAccountId(Principal principal){
         return transferService.getTransferArrayByAccountId(principal);
     }
+    @RequestMapping(value = "transfer/{transferId}", method = RequestMethod.GET)
+    public Transfer getTransferByTransferId(@PathVariable int transferId, Principal principal){
+        return transferService.getTransferByTransferId(transferId, principal);
+    }
+
 
     @RequestMapping(value = "user/{id}", method = RequestMethod.GET)
     public String getUsernameByAccountId(@PathVariable int id){
@@ -50,5 +58,7 @@ public class TransferController {
     public Account getAccountByUserId(@PathVariable int id){
         return transferService.getAccountByUserId(id);
     }
+
+
 
 }

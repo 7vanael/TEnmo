@@ -133,9 +133,22 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-        //implement api call method to getTransferArrayByAccountId
         transferService.printTransferListByAccountId(currentUser);
-		
+        int menuSelection = -1;
+        while (menuSelection != 0) {
+            consoleService.printTransferDetailMenu();
+            menuSelection = consoleService.promptForMenuSelection("Please choose a menu option: ");
+            if(menuSelection == 1){
+                int transferId = consoleService.promptForInt("Please enter the ID of the " +
+                        "transfer for which you would like to see details:");
+                if(transferId >= 3001){
+                    transferService.printTransferByTransferId(transferId, currentUser);
+                }else{
+                    System.out.println("Entry not valid.");
+                    menuSelection = -1;
+                }
+            }
+        }
 	}
 
 	private void viewPendingRequests() {

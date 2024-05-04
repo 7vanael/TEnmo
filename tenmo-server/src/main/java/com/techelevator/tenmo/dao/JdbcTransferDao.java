@@ -84,10 +84,11 @@ public class JdbcTransferDao implements TransferDao{
         }
         return transferList;
     }
-    //use for feature 6.
+
     @Override
-    public Transfer getTransferByTransferId(int transferId, int userId) {
+    public Transfer getTransferByTransferId(int transferId, Principal principal) {
         Transfer transfer = new Transfer();
+        int userId = jdbcUserDao.findIdByUsername(principal.getName());
         String sql = "SELECT * FROM transfer WHERE transfer_id = ? AND (account_from = " +
                 "(SELECT account_id FROM account WHERE user_id = ?) OR account_to = " +
                 "(SELECT account_id FROM account WHERE user_id = ?))";
@@ -109,21 +110,6 @@ public class JdbcTransferDao implements TransferDao{
         return null;
     }
 
-
-//    public void handleDbException(Exception ex, String verb) {
-//        if (ex instanceof CannotGetJdbcConnectionException) {
-//            throw new DaoException("Could not connect to database: "
-//                    + ex.getMessage(), ex);
-//        } else if (ex instanceof BadSqlGrammarException) {
-//            throw new DaoException("Error in SQL grammar" + ex.getMessage(), ex);
-//        }else if (ex instanceof SQLException){
-//            throw new DaoException("SQL exception" + ex.getMessage(), ex);
-//        } else if (ex instanceof DataIntegrityViolationException) {
-//            throw new DaoException("Could not " + verb + "due to data integrity issues: " + ex.getMessage());
-//        } else {
-//            throw new DaoException("Could not " + verb + ex.getMessage());
-//        }
-//    }
 
 
 }

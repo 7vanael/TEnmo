@@ -11,8 +11,6 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.net.http.HttpResponse;
-import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,12 +26,17 @@ public class TransferService {
     private AuthenticatedUser authenticatedUser;
     private Account account;
     private User user;
+    private String[] transferType = new String[]{"Request", "Send"};
+    private String[] transferStatus = new String[]{"Pending", "Approved", "Rejected"};
+
+
 
 
     public TransferService(String baseURL){
         this.baseURL = baseURL;
     }
 
+    //This should probably be in an AccountService
     public Account getAccountByUserId(AuthenticatedUser authenticatedUser){
 
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
@@ -48,7 +51,7 @@ public class TransferService {
 
         return account;
     }
-
+    //This should probably be in a AccountService
     public BigDecimal getBalanceByUser(AuthenticatedUser authenticatedUser){
 
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
@@ -67,7 +70,7 @@ public class TransferService {
         return balance;
     }
 
-
+    //This should probably be in an UserService
     public List<User> getAllUsers (AuthenticatedUser authenticatedUser){
 
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
@@ -79,6 +82,7 @@ public class TransferService {
         return allUsers;
     }
 
+    //This should probably be in an UserService
     public void printAllUsers(AuthenticatedUser authenticatedUser){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users ){
@@ -89,6 +93,7 @@ public class TransferService {
 
     }
 
+    //This should probably be in an UserService
     public boolean validUserSelected(String selectedUserName, AuthenticatedUser authenticatedUser){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users){
@@ -146,6 +151,7 @@ public class TransferService {
 
     }
 
+    //This should probably be in an UserService
     public User getUserByUserName(AuthenticatedUser authenticatedUser, String username){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users){
@@ -156,6 +162,7 @@ public class TransferService {
         return null;
     }
 
+    //This should probably be in an UserService
     public String getUsernameByUserId(AuthenticatedUser authenticatedUser, int userId){
         List<User> users = getAllUsers(authenticatedUser);
         for(User user : users){
@@ -166,6 +173,7 @@ public class TransferService {
         return null;
     }
 
+    //This should probably be in an UserService OR AccountService
     public String getUsernameByAccountId(int accountId, AuthenticatedUser authenticatedUser){
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         String username = "";
@@ -180,7 +188,14 @@ public class TransferService {
 
         return username;
     }
-    //make call to api to getTransferArrayByAccountId
+
+
+    //This should probably be broken up with some chunk to ConsoleService
+    //We initially had written in fewer lines, but extended out to one method per
+    //line to aid in debugging
+
+    //Methods like this probably don't -need- a return, but by including them, they
+    //are more easily testable (if we had had the time to do testing!)
     public List<Transfer> printTransferListByAccountId(AuthenticatedUser authenticatedUser){
         HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
         ResponseEntity<Transfer[]> transferList = restTemplate.exchange(baseURL +
@@ -189,7 +204,7 @@ public class TransferService {
         List<Transfer> results = Arrays.asList(body);
         System.out.println("-------------------------------");
         System.out.println("Transfers");
-        System.out.println("ID" + "   " + "From/To " + "   " + "Amount");
+        System.out.println("ID" + "   " + "From/To " + "     " + "Amount");
         System.out.println("-------------------------------");
         for(Transfer transfer : results){
 
@@ -207,13 +222,48 @@ public class TransferService {
                 toFrom = " From: ";
                 username = getUsernameByAccountId(fromAccountId, authenticatedUser);
             }
-
-            //System.out.println("Id: " + transfer.getTransferId());
             System.out.println(transfer.getTransferId() + toFrom + username + " $" + transfer.getTransferAmount());
 
         }
         System.out.println("---------");
         return results;
+    }
+
+    //This should probably have some parts assigned out to ConsoleService
+    public Transfer printTransferByTransferId(int transferId, AuthenticatedUser authenticatedUser){
+        HttpEntity<Void> entity = makeVoidEntity(authenticatedUser);
+        Transfer transfer = new Transfer();
+        try{
+            ResponseEntity<Transfer> responseEntity = restTemplate.exchange(baseURL + "transfer/" + transferId,
+                    HttpMethod.GET, entity, Transfer.class);
+            transfer = responseEntity.getBody();
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            BasicLogger.log(e.getMessage());
+        }
+
+
+        String nameFrom = getUsernameByAccountId(transfer.getAccountFrom(), authenticatedUser);
+        String nameTo = getUsernameByAccountId(transfer.getAccountTo(), authenticatedUser);
+        String type = transferType[transfer.getTransferTypeId() - 1];
+        String status = transferStatus[transfer.getTransferStatusId() - 1];
+
+
+
+        System.out.println("-------------------------------");
+        System.out.println("Transfer Details");
+        System.out.println("-------------------------------");
+        String printLine =
+                "TransferId: " + transferId + "\n" +
+                "From: " + nameFrom + "\n" +
+                "To: " + nameTo + "\n" +
+                "TransferType: " + type + "\n" +
+                "TransferStatus: " + status + "\n" +
+                "Amount: $" + transfer.getTransferAmount()
+                ;
+
+        System.out.println(printLine);
+
+        return transfer;
     }
 
     private HttpEntity<Void> makeVoidEntity (AuthenticatedUser authUser){
@@ -233,5 +283,8 @@ public class TransferService {
         headers.setBearerAuth(authUser.getToken());
         return new HttpEntity<>(transfer, headers);
     }
+
+
+
 
 }
